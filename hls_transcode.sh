@@ -12,6 +12,11 @@ if [ -z "$INPUT" ] || [ -z "$OUTPUT_DIR" ]; then
   exit 1
 fi
 
+# Get input resolution
+read INPUT_WIDTH INPUT_HEIGHT < <(ffprobe -v error -select_streams v:0 -show_entries stream=width,height \
+  -of csv=p=0:s=x "$INPUT" | awk -F'x' '{print $1, $2}')
+
+
 mkdir -p "$OUTPUT_DIR"
 
 # Define output resolutions
@@ -28,6 +33,15 @@ AUDIO_BITRATES=( ["480"]="96k" ["720"]="128k" ["1080"]="192k" )
 PLAYLISTS=()
 
 for RES in "${!RESOLUTIONS[@]}"; do
+  WIDTH_HEIGHT=${RESOLUTIONS[$RES]}
+  TARGET_WIDTH=$(echo "$WIDTH_HEIGHT" | cut -d'x' -f1)
+  TARGET_HEIGHT=$(echo "$WIDTH_HEIGHT" | cut -d'x' -f2)
+
+  # Skip if target resolution is greater than source
+  if [ "$INPUT_WIDTH" -lt "$TARGET_WIDTH" ] || [ "$INPUT_HEIGHT" -lt "$TARGET_HEIGHT" ]; then
+    echo "⚠️ Skipping $RES (${WIDTH_HEIGHT}) — higher than source resolution ${INPUT_WIDTH}x${INPUT_HEIGHT}"
+    continue
+  fi
   WIDTH_HEIGHT=${RESOLUTIONS[$RES]}
   VBITRATE=${VIDEO_BITRATES[$RES]}
   ABITRATE=${AUDIO_BITRATES[$RES]}
