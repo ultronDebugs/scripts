@@ -13,8 +13,8 @@ NC='\033[0m' # No Color
 
 # Configuration - Update these with your GitHub username and repo details
 GITHUB_USERNAME="your-github-username"
-ALACRITTY_CONFIG_REPO="your-alacritty-config-repo"
-ZSH_CONFIG_REPO="your-zsh-config-repo"
+DOTFILES_REPO="dotfiles"  # Your dotfiles repository name
+DOTFILES_DIR="$HOME/dotfiles"  # Where to clone the dotfiles
 
 echo_info() {
     echo -e "${GREEN}[INFO]${NC} $1"
